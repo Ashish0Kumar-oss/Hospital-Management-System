@@ -9,6 +9,18 @@ import { cn } from '@/lib/utils';
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
+  // Avoid hydration mismatches from Radix-generated IDs by only
+  // rendering the Select on the client after mount.
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return <SelectPrimitive.Root data-slot='select' {...props} />;
 }
 

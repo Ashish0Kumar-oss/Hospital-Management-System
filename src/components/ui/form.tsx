@@ -7,8 +7,8 @@ import {
   Controller,
   FormProvider,
   useFormContext,
-  UseFormReturn,
   useFormState,
+  type UseFormReturn,
   type ControllerProps,
   type FieldPath,
   type FieldValues
@@ -17,25 +17,24 @@ import {
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 
+type FormProps<TFieldValues extends FieldValues = FieldValues> = {
+  children: React.ReactNode;
+  className?: string;
+  onSubmit?: React.FormEventHandler<HTMLFormElement>;
+} & UseFormReturn<TFieldValues>;
+
 const Form = <TFieldValues extends FieldValues = FieldValues>({
   children,
+  className,
   onSubmit,
-  form,
-  className
-}: {
-  children: React.ReactNode;
-  onSubmit: React.FormEventHandler<HTMLFormElement>;
-  form: UseFormReturn<TFieldValues>;
-  className?: string;
-}) => {
-  return (
-    <FormProvider {...form}>
-      <form onSubmit={onSubmit} className={className}>
-        {children}
-      </form>
-    </FormProvider>
-  );
-};
+  ...form
+}: FormProps<TFieldValues>) => (
+  <FormProvider {...form}>
+    <form className={className} onSubmit={onSubmit}>
+      {children}
+    </form>
+  </FormProvider>
+);
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,

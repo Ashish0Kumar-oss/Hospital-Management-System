@@ -16,8 +16,9 @@ const META_THEME_COLORS = {
 };
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'Hospital Management System',
+  description:
+    'Modern hospital management system with patient, doctor, and bed management'
 };
 
 export const viewport: Viewport = {

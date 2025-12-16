@@ -1,188 +1,199 @@
-<p align="center">
-<h1 align="center">Admin Dashboard Starter Template with Next.js &amp; Shadcn UI</h1>
+# Hospital Management System
 
-<div align="center">Built with the Next.js 16 App Router, Tailwind CSS &amp; Shadcn UI components</div>
-
-<br />
-
-<div align="center">
-  <a href="https://dub.sh/shadcn-dashboard"><strong>View Demo</strong></a>
-</div>
-<br />
-<div align="center">
-  <img src="/public/shadcn-dashboard.png" alt="Shadcn Dashboard Cover" style="max-width: 100%; border-radius: 8px;" />
-</div>
-
-## Overview
-
-This is an **admin dashboard starter template** built with **Next.js 16, Shadcn UI, and Tailwind CSS**.
-
-It gives you a production-ready **dashboard UI** with authentication, charts, tables, forms, and a feature-based folder structure, perfect for **SaaS apps, internal tools, and admin panels**.
-
-### Tech Stack
-
-This template uses the following stack:
-
-- Framework - [Next.js 16](https://nextjs.org/16)
-- Language - [TypeScript](https://www.typescriptlang.org)
-- Auth - [Clerk](https://go.clerk.com/ILdYhn7)
-- Error tracking - [Sentry](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree)
-- Styling - [Tailwind CSS v4](https://tailwindcss.com)
-- Components - [Shadcn-ui](https://ui.shadcn.com)
-- Schema Validations - [Zod](https://zod.dev)
-- State Management - [Zustand](https://zustand-demo.pmnd.rs)
-- Search params state manager - [Nuqs](https://nuqs.47ng.com/)
-- Tables - [Tanstack Data Tables](https://ui.shadcn.com/docs/components/data-table) • [Dice table](https://www.diceui.com/docs/components/data-table)
-- Forms - [React Hook Form](https://ui.shadcn.com/docs/components/form)
-- Command+k interface - [kbar](https://kbar.vercel.app/)
-- Linting - [ESLint](https://eslint.org)
-- Pre-commit Hooks - [Husky](https://typicode.github.io/husky/)
-- Formatting - [Prettier](https://prettier.io)
-
-_If you are looking for a Tanstack start dashboard template, here is the [repo](https://git.new/tanstack-start-dashboard)._
+A modern, fully functional hospital management system built with Next.js 16, React 19, TypeScript, and Shadcn UI.
 
 ## Features
 
-- 🧱 Pre-built **admin dashboard layout** (sidebar, header, content area)
+### 🏥 Core Functionality
+- **Patient Management**: Add, edit, view, and discharge patients
+- **Doctor Management**: Manage medical staff with specializations
+- **Bed Management**: Track bed availability and occupancy
+- **Dashboard**: Real-time statistics and analytics
 
-- 📊 **Analytics overview** page with cards and charts
+### 🎨 Modern UI/UX
+- **Dark Theme Support**: Full dark mode with smooth transitions
+- **Animations**: Smooth page transitions and hover effects
+- **Responsive Design**: Works seamlessly on all devices
+- **Modern Components**: Built with Shadcn UI components
 
-- 📋 **Data tables** with server-side search, filter & pagination
+### 📊 Dashboard Features
+- Real-time statistics (patients, doctors, beds)
+- Bed availability by type
+- Recovery rate tracking
+- Doctor-to-patient ratio
+- Visual bed occupancy indicators
 
-- 🔐 **Authentication** & user management via Clerk
+## Tech Stack
 
-- 🏢 **Multi-tenant workspaces** with Clerk Organizations (create, switch, manage teams)
-
-- 💳 **Billing & subscriptions** with Clerk Billing for B2B (plan management, feature gating)
-
-- 🔒 **RBAC navigation system** - Fully client-side navigation filtering based on organization, permissions, and roles
-
-- 🧩 **Shadcn UI components** with Tailwind CSS styling
-
-- 🧠 Feature-based folder structure for scalable projects
-
-- ⚙️ Ready for **SaaS dashboards**, internal tools, and client admin panels
-
-## Use Cases
-
-You can use this Next.js + Shadcn UI dashboard starter to build:
-
-- SaaS admin dashboards
-
-- Internal tools & operations panels
-
-- Analytics dashboards
-
-- Client project admin panels
-
-- Boilerplate for new Next.js admin UI projects
-
-## Pages
-
-| Pages                                                                                                                                                                  | Specifications                                                                                                                                                                                                                                                          |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Signup / Signin](https://go.clerk.com/ILdYhn7)                                                                                                                        | Authentication with **Clerk** provides secure authentication and user management with multiple sign-in options including passwordless authentication, social logins, and enterprise SSO - all designed to enhance security while delivering a seamless user experience. |
-| [Dashboard Overview](https://shadcn-dashboard.kiranism.dev/dashboard)                                                                                                  | Cards with Recharts graphs for analytics. Parallel routes in the overview sections feature independent loading, error handling, and isolated component rendering.                                                                                                       |
-| [Product List (Table)](https://shadcn-dashboard.kiranism.dev/dashboard/product)                                                                                        | Tanstack tables with server side searching, filter, pagination by Nuqs which is a Type-safe search params state manager in nextjs                                                                                                                                       |
-| [Create Product Form](https://shadcn-dashboard.kiranism.dev/dashboard/product/new)                                                                                     | A Product Form with shadcn form (react-hook-form + zod).                                                                                                                                                                                                                |
-| [Profile](https://shadcn-dashboard.kiranism.dev/dashboard/profile)                                                                                                     | Clerk's full-featured account management UI that allows users to manage their profile and security settings                                                                                                                                                             |
-| [Kanban Board](https://shadcn-dashboard.kiranism.dev/dashboard/kanban)                                                                                                 | A Drag n Drop task management board with dnd-kit and zustand to persist state locally.                                                                                                                                                                                  |
-| [Workspaces](https://shadcn-dashboard.kiranism.dev/dashboard/workspaces)                                                                                               | Organization management page using Clerk's `<OrganizationList />` component. Users can view, create, and switch between organizations/workspaces.                                                                                                                       |
-| [Team Management](https://shadcn-dashboard.kiranism.dev/dashboard/workspaces/team)                                                                                     | Full-featured team management interface using Clerk's `<OrganizationProfile />` component. Manage members, roles, permissions, security settings, and organization details. Requires an active organization.                                                            |
-| [Billing & Plans](https://shadcn-dashboard.kiranism.dev/dashboard/billing)                                                                                             | Billing management page using Clerk's `<PricingTable />` component. Organizations can view available plans, subscribe, and manage subscriptions. Requires an active organization.                                                                                       |
-| [Exclusive Page](https://shadcn-dashboard.kiranism.dev/dashboard/exclusive)                                                                                            | Example of plan-based access control using Clerk's `<Protect>` component. This page is only accessible to organizations on the Pro plan, demonstrating feature gating with fallback UI.                                                                                 |
-| [Not Found](https://shadcn-dashboard.kiranism.dev/dashboard/notfound)                                                                                                  | Not Found Page Added in the root level                                                                                                                                                                                                                                  |
-| [Global Error](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree) | A centralized error page that captures and displays errors across the application. Integrated with **Sentry** to log errors, provide detailed reports, and enable replay functionality for better debugging.                                                            |
-
-## Feature based organization
-
-```plaintext
-src/
-├── app/ # Next.js App Router directory
-│ ├── (auth)/ # Auth route group
-│ │ ├── (signin)/
-│ ├── (dashboard)/ # Dashboard route group
-│ │ ├── layout.tsx
-│ │ ├── loading.tsx
-│ │ └── page.tsx
-│ └── api/ # API routes
-│
-├── components/ # Shared components
-│ ├── ui/ # UI components (buttons, inputs, etc.)
-│ └── layout/ # Layout components (header, sidebar, etc.)
-│
-├── features/ # Feature-based modules
-│ ├── feature/
-│ │ ├── components/ # Feature-specific components
-│ │ ├── actions/ # Server actions
-│ │ ├── schemas/ # Form validation schemas
-│ │ └── utils/ # Feature-specific utilities
-│ │
-├── lib/ # Core utilities and configurations
-│ ├── auth/ # Auth configuration
-│ ├── db/ # Database utilities
-│ └── utils/ # Shared utilities
-│
-├── hooks/ # Custom hooks
-│ └── use-debounce.ts
-│
-├── stores/ # Zustand stores
-│ └── dashboard-store.ts
-│
-└── types/ # TypeScript types
-└── index.ts
-```
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **UI Components**: Shadcn UI
+- **Styling**: Tailwind CSS v4
+- **Forms**: React Hook Form + Zod validation
+- **Icons**: Lucide React
+- **Animations**: CSS animations with Tailwind
+- **Data Storage**: JSON file-based (easily replaceable with database)
 
 ## Getting Started
 
-> [!NOTE]  
-> This admin dashboard starter uses **Next.js 16 (App Router)** with **React 19** and **Shadcn UI**. Follow these steps to run it locally:
+### Prerequisites
 
-Clone the repo:
+- Node.js 18+ or Bun
+- npm, yarn, pnpm, or bun
+
+### Installation
+
+1. Install dependencies:
+```bash
+bun install
+# or
+npm install
+```
+
+2. Create a `.env.local` file (optional - for Clerk authentication):
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+```
+
+3. Run the development server:
+```bash
+bun dev
+# or
+npm run dev
+```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Project Structure
 
 ```
-git clone https://github.com/Kiranism/next-shadcn-dashboard-starter.git
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── patients/      # Patient CRUD endpoints
+│   │   ├── doctors/       # Doctor CRUD endpoints
+│   │   ├── beds/          # Bed CRUD endpoints
+│   │   └── dashboard/     # Dashboard stats endpoint
+│   └── dashboard/         # Dashboard pages
+│       ├── overview/      # Main dashboard
+│       ├── patients/      # Patient management
+│       ├── doctors/       # Doctor management
+│       └── beds/          # Bed management
+├── components/            # Reusable components
+│   ├── ui/               # Shadcn UI components
+│   └── forms/            # Form components
+├── features/             # Feature modules
+│   └── hospital/         # Hospital-specific features
+├── lib/                  # Utilities
+│   └── db.ts            # Database operations
+└── types/               # TypeScript types
+    └── hospital.ts      # Hospital domain types
 ```
 
-- `bun install`
-- Create a `.env.local` file by copying the example environment file:
-  `cp env.example.txt .env.local`
-- Add the required environment variables to the `.env.local` file.
-- `bun run dev`
+## Data Storage
 
-##### Environment Configuration Setup
+The system uses JSON file-based storage by default (in the `data/` directory). This is perfect for development and can be easily replaced with:
+- PostgreSQL
+- MySQL
+- MongoDB
+- Prisma ORM
+- Any other database solution
 
-To configure the environment for this project, refer to the `env.example.txt` file. This file contains the necessary environment variables required for authentication and error tracking.
+## Features in Detail
 
-##### Clerk Setup
+### Patient Management
+- Add new patients with full medical information
+- Track symptoms (multi-select)
+- Assign beds and doctors
+- View patient history
+- Discharge patients (automatically frees up beds)
+- Soft delete support
 
-For detailed instructions on configuring Clerk authentication (including organizations/workspaces/teams), please refer to [clerk_setup.md](./docs/clerk_setup.md).
+### Doctor Management
+- Add doctors with specializations
+- Track patient assignments
+- Contact information management
+- Validation to prevent deletion of doctors with active patients
 
-You should now be able to access the application at http://localhost:3000.
+### Bed Management
+- Add beds with types (General, ICU, Private, etc.)
+- Real-time occupancy tracking
+- Automatic bed assignment
+- Validation to prevent deletion of occupied beds
 
-> [!WARNING]
-> After cloning or forking the repository, be cautious when pulling or syncing with the latest changes, as this may result in breaking conflicts.
+## API Endpoints
 
-Cheers! 🥂
+### Patients
+- `GET /api/patients` - List all patients
+- `POST /api/patients` - Create new patient
+- `GET /api/patients/[id]` - Get patient details
+- `PATCH /api/patients/[id]` - Update patient
+- `DELETE /api/patients/[id]` - Delete patient
+- `POST /api/patients/[id]/discharge` - Discharge patient
 
-<!--
+### Doctors
+- `GET /api/doctors` - List all doctors
+- `POST /api/doctors` - Create new doctor
+- `GET /api/doctors/[id]` - Get doctor details
+- `PATCH /api/doctors/[id]` - Update doctor
+- `DELETE /api/doctors/[id]` - Delete doctor
 
-SEO keywords:
+### Beds
+- `GET /api/beds` - List all beds
+- `GET /api/beds?available=true` - List available beds
+- `POST /api/beds` - Create new bed
+- `GET /api/beds/[id]` - Get bed details
+- `PATCH /api/beds/[id]` - Update bed
+- `DELETE /api/beds/[id]` - Delete bed
 
-nextjs admin dashboard, nextjs dashboard template, shadcn ui dashboard,
+### Dashboard
+- `GET /api/dashboard/stats` - Get dashboard statistics
 
-admin dashboard starter, dashboard ui template, nextjs shadcn admin panel,
+## Development
 
-react admin dashboard, tailwind css admin dashboard
+### Build for Production
 
--->
+```bash
+bun run build
+# or
+npm run build
+```
 
-## Star History
+### Start Production Server
 
-<a href="https://www.star-history.com/#Kiranism/next-shadcn-dashboard-starter&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Kiranism/next-shadcn-dashboard-starter&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Kiranism/next-shadcn-dashboard-starter&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Kiranism/next-shadcn-dashboard-starter&type=date&legend=top-left" />
- </picture>
-</a>
+```bash
+bun start
+# or
+npm start
+```
+
+### Linting
+
+```bash
+bun run lint
+# or
+npm run lint
+```
+
+## Customization
+
+### Adding a Database
+
+Replace the functions in `src/lib/db.ts` with your database operations. The interface remains the same, so no other code changes are needed.
+
+### Theming
+
+The system uses Tailwind CSS with CSS variables for theming. Customize colors in `src/app/globals.css`.
+
+### Adding Features
+
+The codebase follows a feature-based structure. Add new features in `src/features/` and create corresponding API routes in `src/app/api/`.
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Support
+
+For issues, questions, or contributions, please open an issue on the repository.

@@ -56,9 +56,17 @@ export default function AppSidebar() {
   const router = useRouter();
   const filteredItems = useFilteredNavItems(navItems);
 
+  // Render the sidebar only after the component has mounted on the client
+  // to avoid hydration mismatches from Radix-generated IDs/attributes.
+  const [mounted, setMounted] = React.useState(false);
+
   React.useEffect(() => {
-    // Side effects based on sidebar state changes
+    setMounted(true);
   }, [isOpen]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <Sidebar collapsible='icon'>

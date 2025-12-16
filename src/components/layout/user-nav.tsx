@@ -13,8 +13,20 @@ import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { SignOutButton, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 export function UserNav() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
+
+  // Show a placeholder if user is not loaded or not authenticated
+  if (!isLoaded || !user) {
+    return (
+      <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
+        <div className='bg-muted flex h-8 w-8 items-center justify-center rounded-full'>
+          <span className='text-xs font-medium'>U</span>
+        </div>
+      </Button>
+    );
+  }
+
   if (user) {
     return (
       <DropdownMenu>
