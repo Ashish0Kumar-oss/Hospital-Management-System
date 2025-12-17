@@ -45,8 +45,8 @@ export default function UserAuthForm() {
 
   return (
     <>
-      <Form
-        form={form}
+    <Form {...form}>
+      <form
         onSubmit={form.handleSubmit(onSubmit)}
         className='w-full space-y-2'
       >
@@ -64,7 +64,8 @@ export default function UserAuthForm() {
         >
           Continue With Email
         </Button>
-      </Form>
+      </form>
+    </Form>
       <div className='relative'>
         <div className='absolute inset-0 flex items-center'>
           <span className='w-full border-t' />
