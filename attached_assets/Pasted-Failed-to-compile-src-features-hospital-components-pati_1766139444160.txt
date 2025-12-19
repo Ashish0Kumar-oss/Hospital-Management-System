@@ -1,0 +1,16 @@
+Failed to compile.
+./src/features/hospital/components/patient-form.tsx:95:5
+Type error: Type 'Resolver<{ name: string; phone_num: string; address: string; bed_id: string; patient_relative_name?: string | undefined; patient_relative_contact?: string | undefined; symptoms?: string[] | undefined; ... 5 more ...; status?: "Admitted" | ... 3 more ... | undefined; }, any, { ...; }>' is not assignable to type 'Resolver<{ name: string; phone_num: string; address: string; bed_id: string; status: "Admitted" | "Recovered" | "Discharged" | "Deceased"; patient_relative_name?: string | undefined; patient_relative_contact?: string | undefined; ... 5 more ...; doctors_visiting_time?: string | undefined; }, any, { ...; }>'.
+  Types of parameters 'options' and 'options' are incompatible.
+    Type 'ResolverOptions<{ name: string; phone_num: string; address: string; bed_id: string; status: "Admitted" | "Recovered" | "Discharged" | "Deceased"; patient_relative_name?: string | undefined; patient_relative_contact?: string | undefined; ... 5 more ...; doctors_visiting_time?: string | undefined; }>' is not assignable to type 'ResolverOptions<{ name: string; phone_num: string; address: string; bed_id: string; patient_relative_name?: string | undefined; patient_relative_contact?: string | undefined; symptoms?: string[] | undefined; ... 5 more ...; status?: "Admitted" | ... 3 more ... | undefined; }>'.
+      Type '"Admitted" | "Recovered" | "Discharged" | "Deceased" | undefined' is not assignable to type '"Admitted" | "Recovered" | "Discharged" | "Deceased"'.
+        Type 'undefined' is not assignable to type '"Admitted" | "Recovered" | "Discharged" | "Deceased"'.
+  93 |
+  94 |   const form = useForm<PatientFormData>({
+> 95 |     resolver: zodResolver(patientFormSchema),
+     |     ^
+  96 |     defaultValues: {
+  97 |       name: initialData?.name || '',
+  98 |       phone_num: initialData?.phone_num || '',
+Next.js build worker exited with code: 1 and signal: null
+Error: Command "next build" exited with 1
