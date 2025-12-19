@@ -22,7 +22,21 @@ const baseConfig: NextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist']
+  transpilePackages: ['geist'],
+  allowedDevOrigins: ['*'],
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate'
+          }
+        ]
+      }
+    ];
+  }
 };
 
 let configWithPlugins = baseConfig;
