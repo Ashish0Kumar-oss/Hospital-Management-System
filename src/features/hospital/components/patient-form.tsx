@@ -32,9 +32,7 @@ const patientFormSchema = z.object({
   doctor_id: z.string().optional(),
   doctors_notes: z.string().optional(),
   doctors_visiting_time: z.string().optional(),
-  status: z
-    .enum(['Admitted', 'Recovered', 'Discharged', 'Deceased'])
-    .default('Admitted')
+  status: z.enum(['Admitted', 'Recovered', 'Discharged', 'Deceased'])
 });
 
 type PatientFormData = z.infer<typeof patientFormSchema>;
@@ -206,7 +204,6 @@ export default function PatientForm({
               control={form.control}
               name='dob'
               label='Date of Birth'
-              placeholder='Select date of birth'
             />
             <FormSelect
               control={form.control}
