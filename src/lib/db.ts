@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './prisma';
 import { Patient, Doctor, Bed, DashboardStats } from '@/types/hospital';
-
-const prisma = new PrismaClient();
 
 // Patient operations
 export async function getPatients(): Promise<Patient[]> {
@@ -472,20 +470,20 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   const bedTypes = ['General', 'ICU', 'Private', 'Semi-Private', 'Emergency'];
   bedTypes.forEach((type) => {
-    const typeBeds = beds.filter((b) => b.bedType === type);
+    const typeBeds = beds.filter((b: any) => b.bedType === type);
     bedStats[type] = {
       total: typeBeds.length,
-      occupied: typeBeds.filter((b) => b.occupied).length,
-      available: typeBeds.filter((b) => !b.occupied).length
+      occupied: typeBeds.filter((b: any) => b.occupied).length,
+      available: typeBeds.filter((b: any) => !b.occupied).length
     };
   });
 
   return {
     total_patients: patients.length,
-    recovered_count: patients.filter((p) => p.status === 'Recovered').length,
-    deceased_count: patients.filter((p) => p.status === 'Deceased').length,
-    admitted_count: patients.filter((p) => p.status === 'Admitted').length,
-    beds_available: beds.filter((b) => !b.occupied).length,
+    recovered_count: patients.filter((p: any) => p.status === 'Recovered').length,
+    deceased_count: patients.filter((p: any) => p.status === 'Deceased').length,
+    admitted_count: patients.filter((p: any) => p.status === 'Admitted').length,
+    beds_available: beds.filter((b: any) => !b.occupied).length,
     total_beds: beds.length,
     total_doctors: doctors.length,
     bed_stats: bedStats
