@@ -1,156 +1,148 @@
+import { PrismaClient } from '@prisma/client';
 import { Patient, Doctor, Bed, DashboardStats } from '@/types/hospital';
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const PATIENTS_FILE = path.join(DATA_DIR, 'patients.json');
-const DOCTORS_FILE = path.join(DATA_DIR, 'doctors.json');
-const BEDS_FILE = path.join(DATA_DIR, 'beds.json');
-
-// Ensure data directory exists
-async function ensureDataDir() {
-  if (!existsSync(DATA_DIR)) {
-    await mkdir(DATA_DIR, { recursive: true });
-  }
-}
-
-// Initialize with sample data if files don't exist
-async function initializeData() {
-  await ensureDataDir();
-
-  if (!existsSync(PATIENTS_FILE)) {
-    await writeFile(PATIENTS_FILE, JSON.stringify([], null, 2));
-  }
-
-  if (!existsSync(DOCTORS_FILE)) {
-    const defaultDoctors: Doctor[] = [
-      {
-        id: '1',
-        name: 'Dr. John Smith',
-        specialization: 'General',
-        phone: '+1234567890',
-        email: 'john.smith@hospital.com',
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '2',
-        name: 'Dr. Sarah Johnson',
-        specialization: 'Cardiologist',
-        phone: '+1234567891',
-        email: 'sarah.johnson@hospital.com',
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: '3',
-        name: 'Dr. Michael Brown',
-        specialization: 'Neurologist',
-        phone: '+1234567892',
-        email: 'michael.brown@hospital.com',
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-    ];
-    await writeFile(DOCTORS_FILE, JSON.stringify(defaultDoctors, null, 2));
-  }
-
-  if (!existsSync(BEDS_FILE)) {
-    const defaultBeds: Bed[] = [];
-    // Create 20 beds of different types
-    const bedTypes: Bed['bed_type'][] = [
-      'General',
-      'ICU',
-      'Private',
-      'Semi-Private',
-      'Emergency'
-    ];
-    for (let i = 1; i <= 20; i++) {
-      const bedType = bedTypes[Math.floor((i - 1) / 4) % bedTypes.length];
-      defaultBeds.push({
-        id: `bed-${i}`,
-        bed_number: `B${String(i).padStart(3, '0')}`,
-        room_number: `R${Math.ceil(i / 2)}`,
-        bed_type: bedType,
-        occupied: false,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    }
-    await writeFile(BEDS_FILE, JSON.stringify(defaultBeds, null, 2));
-  }
-}
-
-// Read data from file
-async function readData<T>(filePath: string): Promise<T[]> {
-  await initializeData();
-  try {
-    const data = await readFile(filePath, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    return [];
-  }
-}
-
-// Write data to file
-async function writeData<T>(filePath: string, data: T[]): Promise<void> {
-  await ensureDataDir();
-  await writeFile(filePath, JSON.stringify(data, null, 2));
-}
+const prisma = new PrismaClient();
 
 // Patient operations
 export async function getPatients(): Promise<Patient[]> {
-  return readData<Patient>(PATIENTS_FILE);
+  const patients = await prisma.patient.findMany({
+    where: { isActive: true },
+    include: { bed: true, doctor: true }
+  });
+  return patients.map((p: any) => ({
+    id: p.id,
+    name: p.name,
+    phone_num: p.phoneNum,
+    patient_relative_name: p.patientRelativeName || undefined,
+    patient_relative_contact: p.patientRelativeContact || undefined,
+    address: p.address,
+    symptoms: p.symptoms as any,
+    prior_ailments: p.priorAilments || undefined,
+    bed_id: p.bedId,
+    dob: p.dob || undefined,
+    doctor_id: p.doctorId || undefined,
+    doctors_notes: p.doctorsNotes || undefined,
+    doctors_visiting_time: p.doctorsVisitingTime || undefined,
+    status: p.status as any,
+    admission_date: p.admissionDate.toISOString(),
+    discharge_date: p.dischargeDate?.toISOString(),
+    is_active: p.isActive,
+    created_at: p.createdAt.toISOString(),
+    updated_at: p.updatedAt.toISOString()
+  }));
 }
 
 export async function getPatient(id: string): Promise<Patient | null> {
-  const patients = await getPatients();
-  return patients.find((p) => p.id === id && p.is_active) || null;
+  const patient = await prisma.patient.findFirst({
+    where: { id, isActive: true },
+    include: { bed: true, doctor: true }
+  });
+  if (!patient) return null;
+  return {
+    id: patient.id,
+    name: patient.name,
+    phone_num: patient.phoneNum,
+    patient_relative_name: patient.patientRelativeName || undefined,
+    patient_relative_contact: patient.patientRelativeContact || undefined,
+    address: patient.address,
+    symptoms: patient.symptoms as any,
+    prior_ailments: patient.priorAilments || undefined,
+    bed_id: patient.bedId,
+    dob: patient.dob || undefined,
+    doctor_id: patient.doctorId || undefined,
+    doctors_notes: patient.doctorsNotes || undefined,
+    doctors_visiting_time: patient.doctorsVisitingTime || undefined,
+    status: patient.status as any,
+    admission_date: patient.admissionDate.toISOString(),
+    discharge_date: patient.dischargeDate?.toISOString(),
+    is_active: patient.isActive,
+    created_at: patient.createdAt.toISOString(),
+    updated_at: patient.updatedAt.toISOString()
+  };
 }
 
 export async function createPatient(
   patient: Omit<Patient, 'id' | 'created_at' | 'updated_at'>
 ): Promise<Patient> {
-  const patients = await getPatients();
-  const newPatient: Patient = {
-    ...patient,
-    id: `patient-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    // Default admission metadata
-    admission_date: patient.admission_date || new Date().toISOString(),
-    is_active: patient.is_active ?? true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  patients.push(newPatient);
+  const newPatient = await prisma.patient.create({
+    data: {
+      id: `patient-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: patient.name,
+      phoneNum: patient.phone_num,
+      patientRelativeName: patient.patient_relative_name,
+      patientRelativeContact: patient.patient_relative_contact,
+      address: patient.address,
+      symptoms: patient.symptoms || [],
+      priorAilments: patient.prior_ailments,
+      bedId: patient.bed_id,
+      dob: patient.dob,
+      doctorId: patient.doctor_id,
+      doctorsNotes: patient.doctors_notes,
+      doctorsVisitingTime: patient.doctors_visiting_time,
+      status: patient.status,
+      admissionDate: new Date(patient.admission_date),
+      dischargeDate: patient.discharge_date ? new Date(patient.discharge_date) : null,
+      isActive: true
+    }
+  });
 
   // Mark bed as occupied
-  if (newPatient.bed_id) {
-    await updateBedOccupancy(newPatient.bed_id, true);
+  if (newPatient.bedId) {
+    await updateBedOccupancy(newPatient.bedId, true);
   }
 
-  await writeData(PATIENTS_FILE, patients);
-  return newPatient;
+  return {
+    id: newPatient.id,
+    name: newPatient.name,
+    phone_num: newPatient.phoneNum,
+    patient_relative_name: newPatient.patientRelativeName || undefined,
+    patient_relative_contact: newPatient.patientRelativeContact || undefined,
+    address: newPatient.address,
+    symptoms: newPatient.symptoms as any,
+    prior_ailments: newPatient.priorAilments || undefined,
+    bed_id: newPatient.bedId,
+    dob: newPatient.dob || undefined,
+    doctor_id: newPatient.doctorId || undefined,
+    doctors_notes: newPatient.doctorsNotes || undefined,
+    doctors_visiting_time: newPatient.doctorsVisitingTime || undefined,
+    status: newPatient.status as any,
+    admission_date: newPatient.admissionDate.toISOString(),
+    discharge_date: newPatient.dischargeDate?.toISOString(),
+    is_active: newPatient.isActive,
+    created_at: newPatient.createdAt.toISOString(),
+    updated_at: newPatient.updatedAt.toISOString()
+  };
 }
 
 export async function updatePatient(
   id: string,
   updates: Partial<Patient>
 ): Promise<Patient | null> {
-  const patients = await getPatients();
-  const index = patients.findIndex((p) => p.id === id);
-  if (index === -1) return null;
+  const patient = await prisma.patient.findUnique({ where: { id } });
+  if (!patient) return null;
 
-  const oldBedId = patients[index].bed_id;
-  patients[index] = {
-    ...patients[index],
-    ...updates,
-    updated_at: new Date().toISOString()
-  };
+  const oldBedId = patient.bedId;
+
+  const updated = await prisma.patient.update({
+    where: { id },
+    data: {
+      name: updates.name,
+      phoneNum: updates.phone_num,
+      patientRelativeName: updates.patient_relative_name,
+      patientRelativeContact: updates.patient_relative_contact,
+      address: updates.address,
+      symptoms: updates.symptoms,
+      priorAilments: updates.prior_ailments,
+      bedId: updates.bed_id,
+      dob: updates.dob,
+      doctorId: updates.doctor_id,
+      doctorsNotes: updates.doctors_notes,
+      doctorsVisitingTime: updates.doctors_visiting_time,
+      status: updates.status,
+      admissionDate: updates.admission_date ? new Date(updates.admission_date) : undefined,
+      dischargeDate: updates.discharge_date ? new Date(updates.discharge_date) : undefined
+    }
+  });
 
   // Handle bed changes
   if (updates.bed_id && updates.bed_id !== oldBedId) {
@@ -158,23 +150,42 @@ export async function updatePatient(
     await updateBedOccupancy(updates.bed_id, true);
   }
 
-  await writeData(PATIENTS_FILE, patients);
-  return patients[index];
+  return {
+    id: updated.id,
+    name: updated.name,
+    phone_num: updated.phoneNum,
+    patient_relative_name: updated.patientRelativeName || undefined,
+    patient_relative_contact: updated.patientRelativeContact || undefined,
+    address: updated.address,
+    symptoms: updated.symptoms as any,
+    prior_ailments: updated.priorAilments || undefined,
+    bed_id: updated.bedId,
+    dob: updated.dob || undefined,
+    doctor_id: updated.doctorId || undefined,
+    doctors_notes: updated.doctorsNotes || undefined,
+    doctors_visiting_time: updated.doctorsVisitingTime || undefined,
+    status: updated.status as any,
+    admission_date: updated.admissionDate.toISOString(),
+    discharge_date: updated.dischargeDate?.toISOString(),
+    is_active: updated.isActive,
+    created_at: updated.createdAt.toISOString(),
+    updated_at: updated.updatedAt.toISOString()
+  };
 }
 
 export async function deletePatient(id: string): Promise<boolean> {
-  const patients = await getPatients();
-  const index = patients.findIndex((p) => p.id === id);
-  if (index === -1) return false;
+  const patient = await prisma.patient.findUnique({ where: { id } });
+  if (!patient) return false;
 
-  const patient = patients[index];
   // Free up bed
-  if (patient.bed_id) {
-    await updateBedOccupancy(patient.bed_id, false);
+  if (patient.bedId) {
+    await updateBedOccupancy(patient.bedId, false);
   }
 
-  patients[index].is_active = false;
-  await writeData(PATIENTS_FILE, patients);
+  await prisma.patient.update({
+    where: { id },
+    data: { isActive: false }
+  });
   return true;
 }
 
@@ -183,6 +194,7 @@ export async function dischargePatient(id: string): Promise<Patient | null> {
   if (!patient) return null;
 
   const updated = await updatePatient(id, {
+    ...patient,
     status: 'Discharged',
     discharge_date: new Date().toISOString()
   });
@@ -196,180 +208,271 @@ export async function dischargePatient(id: string): Promise<Patient | null> {
 
 // Doctor operations
 export async function getDoctors(): Promise<Doctor[]> {
-  const doctors = await readData<Doctor>(DOCTORS_FILE);
-  const patients = await getPatients();
-
-  // Calculate patient count for each doctor
-  return doctors.map((doctor) => ({
-    ...doctor,
-    patient_count: patients.filter(
-      (p) => p.doctor_id === doctor.id && p.is_active
-    ).length
+  const doctors = await prisma.doctor.findMany({
+    where: { isActive: true },
+    include: { patients: true }
+  });
+  return doctors.map((d: any) => ({
+    id: d.id,
+    name: d.name,
+    specialization: d.specialization as any,
+    phone: d.phone || undefined,
+    email: d.email || undefined,
+    is_active: d.isActive,
+    created_at: d.createdAt.toISOString(),
+    updated_at: d.updatedAt.toISOString(),
+    patient_count: d.patients.filter((p: any) => p.isActive).length
   }));
 }
 
 export async function getDoctor(id: string): Promise<Doctor | null> {
-  const doctors = await getDoctors();
-  return doctors.find((d) => d.id === id && d.is_active) || null;
+  const doctor = await prisma.doctor.findFirst({
+    where: { id, isActive: true },
+    include: { patients: true }
+  });
+  if (!doctor) return null;
+  return {
+    id: doctor.id,
+    name: doctor.name,
+    specialization: doctor.specialization as any,
+    phone: doctor.phone || undefined,
+    email: doctor.email || undefined,
+    is_active: doctor.isActive,
+    created_at: doctor.createdAt.toISOString(),
+    updated_at: doctor.updatedAt.toISOString(),
+    patient_count: doctor.patients.filter((p: any) => p.isActive).length
+  };
 }
 
 export async function createDoctor(
   doctor: Omit<Doctor, 'id' | 'created_at' | 'updated_at' | 'patient_count'>
 ): Promise<Doctor> {
-  const doctors = await readData<Doctor>(DOCTORS_FILE);
-  const newDoctor: Doctor = {
-    ...doctor,
-    id: `doctor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+  const newDoctor = await prisma.doctor.create({
+    data: {
+      id: `doctor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: doctor.name,
+      specialization: doctor.specialization,
+      phone: doctor.phone,
+      email: doctor.email,
+      isActive: true
+    },
+    include: { patients: true }
+  });
+  return {
+    id: newDoctor.id,
+    name: newDoctor.name,
+    specialization: newDoctor.specialization as any,
+    phone: newDoctor.phone || undefined,
+    email: newDoctor.email || undefined,
+    is_active: newDoctor.isActive,
+    created_at: newDoctor.createdAt.toISOString(),
+    updated_at: newDoctor.updatedAt.toISOString(),
+    patient_count: 0
   };
-  doctors.push(newDoctor);
-  await writeData(DOCTORS_FILE, doctors);
-  return newDoctor;
 }
 
 export async function updateDoctor(
   id: string,
   updates: Partial<Doctor>
 ): Promise<Doctor | null> {
-  const doctors = await readData<Doctor>(DOCTORS_FILE);
-  const index = doctors.findIndex((d) => d.id === id);
-  if (index === -1) return null;
+  const doctor = await prisma.doctor.findUnique({ 
+    where: { id },
+    include: { patients: true }
+  });
+  if (!doctor) return null;
 
-  doctors[index] = {
-    ...doctors[index],
-    ...updates,
-    updated_at: new Date().toISOString()
+  const updated = await prisma.doctor.update({
+    where: { id },
+    data: {
+      name: updates.name,
+      specialization: updates.specialization,
+      phone: updates.phone,
+      email: updates.email
+    },
+    include: { patients: true }
+  });
+  return {
+    id: updated.id,
+    name: updated.name,
+    specialization: updated.specialization as any,
+    phone: updated.phone || undefined,
+    email: updated.email || undefined,
+    is_active: updated.isActive,
+    created_at: updated.createdAt.toISOString(),
+    updated_at: updated.updatedAt.toISOString(),
+    patient_count: updated.patients.filter((p: any) => p.isActive).length
   };
-  await writeData(DOCTORS_FILE, doctors);
-  return doctors[index];
 }
 
 export async function deleteDoctor(id: string): Promise<boolean> {
-  const doctors = await readData<Doctor>(DOCTORS_FILE);
-  const patients = await getPatients();
+  const patients = await prisma.patient.findMany({
+    where: { doctorId: id, isActive: true }
+  });
 
-  // Check if doctor has active patients
-  const activePatients = patients.filter(
-    (p) => p.doctor_id === id && p.is_active
-  );
-  if (activePatients.length > 0) {
+  if (patients.length > 0) {
     throw new Error(
-      `Cannot delete doctor - has ${activePatients.length} active patients`
+      `Cannot delete doctor - has ${patients.length} active patients`
     );
   }
 
-  const index = doctors.findIndex((d) => d.id === id);
-  if (index === -1) return false;
-
-  doctors[index].is_active = false;
-  await writeData(DOCTORS_FILE, doctors);
+  await prisma.doctor.update({
+    where: { id },
+    data: { isActive: false }
+  });
   return true;
 }
 
 // Bed operations
 export async function getBeds(): Promise<Bed[]> {
-  return readData<Bed>(BEDS_FILE);
+  const beds = await prisma.bed.findMany({
+    where: { isActive: true }
+  });
+  return beds.map((b: any) => ({
+    id: b.id,
+    bed_number: b.bedNumber,
+    room_number: b.roomNumber || undefined,
+    bed_type: b.bedType as any,
+    occupied: b.occupied,
+    is_active: b.isActive,
+    created_at: b.createdAt.toISOString(),
+    updated_at: b.updatedAt.toISOString()
+  }));
 }
 
 export async function getBed(id: string): Promise<Bed | null> {
-  const beds = await getBeds();
-  return beds.find((b) => b.id === id && b.is_active) || null;
+  const bed = await prisma.bed.findFirst({
+    where: { id, isActive: true }
+  });
+  if (!bed) return null;
+  return {
+    id: bed.id,
+    bed_number: bed.bedNumber,
+    room_number: bed.roomNumber || undefined,
+    bed_type: bed.bedType as any,
+    occupied: bed.occupied,
+    is_active: bed.isActive,
+    created_at: bed.createdAt.toISOString(),
+    updated_at: bed.updatedAt.toISOString()
+  };
 }
 
 export async function getAvailableBeds(): Promise<Bed[]> {
-  const beds = await getBeds();
-  return beds.filter((b) => !b.occupied && b.is_active);
+  const beds = await prisma.bed.findMany({
+    where: { occupied: false, isActive: true }
+  });
+  return beds.map((b: any) => ({
+    id: b.id,
+    bed_number: b.bedNumber,
+    room_number: b.roomNumber || undefined,
+    bed_type: b.bedType as any,
+    occupied: b.occupied,
+    is_active: b.isActive,
+    created_at: b.createdAt.toISOString(),
+    updated_at: b.updatedAt.toISOString()
+  }));
 }
 
 export async function createBed(
   bed: Omit<Bed, 'id' | 'created_at' | 'updated_at'>
 ): Promise<Bed> {
-  const beds = await getBeds();
-
-  // Check if bed number already exists
-  if (beds.some((b) => b.bed_number === bed.bed_number)) {
+  const existingBed = await prisma.bed.findFirst({
+    where: { bedNumber: bed.bed_number }
+  });
+  if (existingBed) {
     throw new Error(`Bed ${bed.bed_number} already exists`);
   }
 
-  const newBed: Bed = {
-    ...bed,
-    id: `bed-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+  const newBed = await prisma.bed.create({
+    data: {
+      id: `bed-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      bedNumber: bed.bed_number,
+      roomNumber: bed.room_number,
+      bedType: bed.bed_type,
+      occupied: bed.occupied,
+      isActive: true
+    }
+  });
+  return {
+    id: newBed.id,
+    bed_number: newBed.bedNumber,
+    room_number: newBed.roomNumber || undefined,
+    bed_type: newBed.bedType as any,
+    occupied: newBed.occupied,
+    is_active: newBed.isActive,
+    created_at: newBed.createdAt.toISOString(),
+    updated_at: newBed.updatedAt.toISOString()
   };
-  beds.push(newBed);
-  await writeData(BEDS_FILE, beds);
-  return newBed;
 }
 
 export async function updateBed(
   id: string,
   updates: Partial<Bed>
 ): Promise<Bed | null> {
-  const beds = await getBeds();
-  const index = beds.findIndex((b) => b.id === id);
-  if (index === -1) return null;
+  const bed = await prisma.bed.findUnique({ where: { id } });
+  if (!bed) return null;
 
-  beds[index] = {
-    ...beds[index],
-    ...updates,
-    updated_at: new Date().toISOString()
+  const updated = await prisma.bed.update({
+    where: { id },
+    data: {
+      bedNumber: updates.bed_number,
+      roomNumber: updates.room_number,
+      bedType: updates.bed_type,
+      occupied: updates.occupied
+    }
+  });
+  return {
+    id: updated.id,
+    bed_number: updated.bedNumber,
+    room_number: updated.roomNumber || undefined,
+    bed_type: updated.bedType as any,
+    occupied: updated.occupied,
+    is_active: updated.isActive,
+    created_at: updated.createdAt.toISOString(),
+    updated_at: updated.updatedAt.toISOString()
   };
-  await writeData(BEDS_FILE, beds);
-  return beds[index];
 }
 
-async function updateBedOccupancy(
-  bedId: string,
-  occupied: boolean
-): Promise<void> {
-  const beds = await getBeds();
-  const index = beds.findIndex((b) => b.id === bedId);
-  if (index !== -1) {
-    beds[index].occupied = occupied;
-    beds[index].updated_at = new Date().toISOString();
-    await writeData(BEDS_FILE, beds);
-  }
+async function updateBedOccupancy(bedId: string, occupied: boolean): Promise<void> {
+  await prisma.bed.update({
+    where: { id: bedId },
+    data: { occupied }
+  });
 }
 
 export async function deleteBed(id: string): Promise<boolean> {
-  const beds = await getBeds();
-  const bed = beds.find((b) => b.id === id);
+  const bed = await prisma.bed.findUnique({ where: { id } });
 
   if (bed?.occupied) {
     throw new Error(`Cannot delete bed - currently occupied`);
   }
 
-  const index = beds.findIndex((b) => b.id === id);
-  if (index === -1) return false;
-
-  beds[index].is_active = false;
-  await writeData(BEDS_FILE, beds);
+  await prisma.bed.update({
+    where: { id },
+    data: { isActive: false }
+  });
   return true;
 }
 
 // Dashboard stats
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const patients = await getPatients();
-  const beds = await getBeds();
-  const doctors = await getDoctors();
+  const patients = await prisma.patient.findMany({
+    where: { isActive: true }
+  });
+  const beds = await prisma.bed.findMany({
+    where: { isActive: true }
+  });
+  const doctors = await prisma.doctor.findMany({
+    where: { isActive: true }
+  });
 
-  const activePatients = patients.filter((p) => p.is_active);
   const bedStats: Record<
     string,
     { total: number; occupied: number; available: number }
   > = {};
 
-  const bedTypes: Bed['bed_type'][] = [
-    'General',
-    'ICU',
-    'Private',
-    'Semi-Private',
-    'Emergency'
-  ];
+  const bedTypes = ['General', 'ICU', 'Private', 'Semi-Private', 'Emergency'];
   bedTypes.forEach((type) => {
-    const typeBeds = beds.filter((b) => b.bed_type === type && b.is_active);
+    const typeBeds = beds.filter((b) => b.bedType === type);
     bedStats[type] = {
       total: typeBeds.length,
       occupied: typeBeds.filter((b) => b.occupied).length,
@@ -378,16 +481,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   });
 
   return {
-    total_patients: activePatients.length,
-    recovered_count: activePatients.filter((p) => p.status === 'Recovered')
-      .length,
-    deceased_count: activePatients.filter((p) => p.status === 'Deceased')
-      .length,
-    admitted_count: activePatients.filter((p) => p.status === 'Admitted')
-      .length,
-    beds_available: beds.filter((b) => !b.occupied && b.is_active).length,
-    total_beds: beds.filter((b) => b.is_active).length,
-    total_doctors: doctors.filter((d) => d.is_active).length,
+    total_patients: patients.length,
+    recovered_count: patients.filter((p) => p.status === 'Recovered').length,
+    deceased_count: patients.filter((p) => p.status === 'Deceased').length,
+    admitted_count: patients.filter((p) => p.status === 'Admitted').length,
+    beds_available: beds.filter((b) => !b.occupied).length,
+    total_beds: beds.length,
+    total_doctors: doctors.length,
     bed_stats: bedStats
   };
 }

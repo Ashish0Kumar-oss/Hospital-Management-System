@@ -12,35 +12,59 @@ datasource db {
   provider = "postgresql"
 }
 
-model Bed {
-  id         String   @id
-  bedNumber  String
-  roomNumber String
-  bedType    String
-  occupied   Boolean
-  isActive   Boolean
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model Patient {
+  id                        String   @id
+  name                      String
+  phoneNum                  String   @map("phone_num")
+  patientRelativeName       String?  @map("patient_relative_name")
+  patientRelativeContact    String?  @map("patient_relative_contact")
+  address                   String
+  symptoms                  String[] @default([])
+  priorAilments             String?  @map("prior_ailments")
+  bedId                     String   @map("bed_id")
+  dob                       String?
+  doctorId                  String?  @map("doctor_id")
+  doctorsNotes              String?  @map("doctors_notes")
+  doctorsVisitingTime       String?  @map("doctors_visiting_time")
+  status                    String   // PatientStatus enum
+  admissionDate             DateTime @map("admission_date")
+  dischargeDate             DateTime? @map("discharge_date")
+  isActive                  Boolean  @default(true) @map("is_active")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  bed                       Bed?     @relation(fields: [bedId], references: [id])
+  doctor                    Doctor?  @relation(fields: [doctorId], references: [id])
+
+  @@map("Patient")
 }
 
 model Doctor {
-  id        String   @id
-  name      String
-  specialization String
-  phone     String
-  email     String
-  isActive  Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String   @id
+  name                String
+  specialization      String   // DoctorSpecialization enum
+  phone               String?
+  email               String?
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  patients            Patient[]
+
+  @@map("Doctor")
 }
 
-model Patient {
-  id        String   @id
-  name      String
-  phoneNum  String
-  status    String
-  bedId     String
-  doctorId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Bed {
+  id                  String   @id
+  bedNumber           String   @unique @map("bed_number")
+  roomNumber          String?  @map("room_number")
+  bedType             String   @map("bed_type") // BedType enum
+  occupied            Boolean  @default(false)
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  patients            Patient[]
+
+  @@map("Bed")
 }
